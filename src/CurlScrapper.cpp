@@ -71,7 +71,7 @@ void CurlScrapper::setStorage(shared_ptr<DataStorage> storage) {
     this->storage = storage;
 }
 
-void CurlScrapper::setSettings(shared_ptr<DataCollectorSettings> settings) {
+void CurlScrapper::setSettings(shared_ptr<DataSettings> settings) {
     BOOST_LOG_TRIVIAL(debug) << "Setting settings for CurlScrapper";
     this->settings = settings;
 }

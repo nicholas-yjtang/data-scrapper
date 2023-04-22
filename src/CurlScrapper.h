@@ -12,7 +12,7 @@ class CurlScrapper : public DataCollector {
         void collectData() override;
         void build() override;
         void setStorage(shared_ptr<DataStorage> storage) override;
-        void setSettings(shared_ptr<DataCollectorSettings> settings) override;
+        void setSettings(shared_ptr<DataSettings> settings) override;
         string getSetting(const string & key) override;
         struct MemoryStruct {
             char *memory;
@@ -23,7 +23,7 @@ class CurlScrapper : public DataCollector {
         CURL *curl;
         MemoryStruct chunk;
         shared_ptr<DataStorage> storage;
-        shared_ptr<DataCollectorSettings> settings;
+        shared_ptr<DataSettings> settings;
         void resetChunk();
         void setUrl();
         void setTimeout();

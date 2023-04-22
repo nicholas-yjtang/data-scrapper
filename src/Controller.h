@@ -1,7 +1,7 @@
 #ifndef CONTROLLER_H
 #define CONTROLLER_H
 
-#include "DataCollectorSettings.h"
+#include "DataSettings.h"
 #include "DataStorage.h"
 #include "DataCollector.h"
 #include "CommandQueue.h"
@@ -18,7 +18,7 @@ class Controller {
         void build();
         queue<string> getStoredUrls();
     private:
-        shared_ptr<DataCollectorSettings> settings;
+        shared_ptr<DataSettings> settings;
         shared_ptr<DataStorage> storage;
         shared_ptr<DataCollector> collector;
         shared_ptr<CommandQueue> commandQueue;

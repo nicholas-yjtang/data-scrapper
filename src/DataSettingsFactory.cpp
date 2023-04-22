@@ -1,22 +1,22 @@
-#include "DataCollectorSettingsFactory.h"
+#include "DataSettingsFactory.h"
 #include <boost/log/trivial.hpp>
 #include "CurlSettings.h"
 
-DataCollectorSettingsFactory::DataCollectorSettingsFactory() {
+DataSettingsFactory::DataSettingsFactory() {
     BOOST_LOG_TRIVIAL(debug) << "Creating DataCollectorSettingsFactory";
 }
 
-DataCollectorSettingsFactory::~DataCollectorSettingsFactory() {
+DataSettingsFactory::~DataSettingsFactory() {
     BOOST_LOG_TRIVIAL(debug) << "Destroying DataCollectorSettingsFactory";
 }
 
-DataCollectorSettingsFactory & DataCollectorSettingsFactory::getInstance() {
+DataSettingsFactory & DataSettingsFactory::getInstance() {
     BOOST_LOG_TRIVIAL(trace) << "Getting DataCollectorSettingsFactory instance";
-    static DataCollectorSettingsFactory instance;
+    static DataSettingsFactory instance;
     return instance;
 }
 
-shared_ptr<DataCollectorSettings> DataCollectorSettingsFactory::createDataCollectorSettings(const string &type) {
+shared_ptr<DataSettings> DataSettingsFactory::createDataSettings(const string &type) {
     BOOST_LOG_TRIVIAL(debug) << "Creating DataCollectorSettings";
     if (type == "curl") return make_shared<CurlSettings>();    
     BOOST_LOG_TRIVIAL(warning) << "Unknown DataCollectorSettings type: " << type << ". Returning nullptr";

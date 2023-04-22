@@ -9,9 +9,12 @@ class LocalDataStorage : public DataStorage {
         virtual ~LocalDataStorage();
         void storeData(shared_ptr<Data> data) override;
         queue<string> getStoredUrls() override;
+        void setSettings(shared_ptr<DataSettings> settings) override;
     private:
+        void storeUrl(const string & url);
         string getEpochTime();
         queue<string> storedUrls;
+        shared_ptr<DataSettings> settings;
 };
 
 #endif

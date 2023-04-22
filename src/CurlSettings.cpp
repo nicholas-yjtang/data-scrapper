@@ -34,3 +34,8 @@ void CurlSettings::load() {
     BOOST_LOG_TRIVIAL(debug) << "Loading settings";
     ini_parser::read_ini("data/conf/conf.ini", settings);
 }
+
+void CurlSettings::clear() {
+    BOOST_LOG_TRIVIAL(debug) << "Clearing settings";
+    settings.clear();
+}

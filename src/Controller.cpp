@@ -2,7 +2,7 @@
 #include <boost/log/trivial.hpp>
 #include "DataCollectingThread.h"
 #include "Command.h"
-#include "DataCollectorSettingsFactory.h"
+#include "DataSettingsFactory.h"
 #include "DataCollectorFactory.h"
 #include "DataStorageFactory.h"
 
@@ -21,8 +21,9 @@ Controller::~Controller() {
 
 
 void Controller::build() {
-    settings = DataCollectorSettingsFactory::getInstance().createDataCollectorSettings("curl");
+    settings = DataSettingsFactory::getInstance().createDataSettings("curl");
     storage = DataStorageFactory::getInstance().createDataStorage("local");    
+    storage->setSettings(settings);
     string autostart = settings->get("collect.autostart");
     if (autostart == "true") run();
 }
@@ -74,6 +75,13 @@ void Controller::sendCommand(const string & command, const string & action, cons
             string value = options.substr(options.find("=") + 1);
             BOOST_LOG_TRIVIAL(debug) << "Setting " << key << " to " << value;
             settings->set(key, value);
+        }
+        else if (action == "clear") {
+            if (settings == nullptr) {
+                BOOST_LOG_TRIVIAL(warning) << "Settings not initialized";
+                return;
+            }
+            settings->clear();
         }
     }
     else BOOST_LOG_TRIVIAL(warning) << "Unknown command: " << command;

@@ -10,7 +10,7 @@
 #include <boost/log/expressions.hpp>
 #include <boost/log/utility/setup/file.hpp>
 #include "../src/DataCollectorFactory.h"
-#include "../src/DataCollectorSettingsFactory.h"
+#include "../src/DataSettingsFactory.h"
 #include "../src/DataStorageFactory.h"
 #include "../src/Controller.h"
 
@@ -93,12 +93,14 @@ TEST_F(MockServer, testData) {
     BOOST_LOG_TRIVIAL(debug) << "Testing Data related classes";
     port = 18081;
     run();
-    auto settings = DataCollectorSettingsFactory::getInstance().createDataCollectorSettings("curl");
+    auto settings = DataSettingsFactory::getInstance().createDataSettings("curl");
     auto storage  = DataStorageFactory::getInstance().createDataStorage("local");
     auto scrapper = DataCollectorFactory::getInstance().createDataCollector("curl");
     settings->set("data.url", "http://localhost:" + to_string(port) + "/data");
     settings->set("data.name", "test");
     settings->set("data.type", "json");
+    settings->set("store.audit", "true");
+    storage->setSettings(settings);
     scrapper->setSettings(settings);
     scrapper->setStorage(storage);
     scrapper->build();
@@ -110,9 +112,14 @@ TEST_F(MockServer, testData) {
         BOOST_LOG_TRIVIAL(debug) << "Last store: " << lastStore;
         ASSERT_TRUE(Utils::compareFiles("test_geo.json", lastStore));
     }
+    settings->set("store.audit", "");
+    scrapper->collectData();    
+    auto storedUrls = storage->getStoredUrls();
+    ASSERT_TRUE(storedUrls.size()==0);
     settings->set("data.url", "");
     settings->set("data.name", "");
     settings->set("data.type", "");
+    settings->set("store.audit", "");
 
 }
 
@@ -124,18 +131,20 @@ TEST_F(MockServer, testController) {
     controller.sendCommand("configure", "put", "data.url=http://localhost:" + to_string(port) + "/data");
     controller.sendCommand("configure", "put", "data.name=test");
     controller.sendCommand("configure", "put", "data.type=json");
+    controller.sendCommand("configure", "put", "store.audit=true");
     controller.sendCommand("collect", "start", "");
     this_thread::sleep_for(chrono::seconds(5));
     controller.sendCommand("collect", "stop", "");
     controller.closeThreads();
     auto storedUrls = controller.getStoredUrls();
+    ASSERT_TRUE(storedUrls.size() > 0);
     while (!storedUrls.empty()) {
         string url = storedUrls.front();
         BOOST_LOG_TRIVIAL(debug) << "Stored url: " << url;
         ASSERT_TRUE(Utils::compareFiles("test_geo.json", url));
         storedUrls.pop();
     }
-
+    controller.sendCommand("configure", "clear", "");
 }
 
 TEST_F(MockServer, testControllerRestart) {
@@ -147,6 +156,7 @@ TEST_F(MockServer, testControllerRestart) {
     controller.sendCommand("configure", "put", "data.name=test");
     controller.sendCommand("configure", "put", "data.type=json");
     controller.sendCommand("configure" , "put", "data.timeout=500");
+    controller.sendCommand("configure", "put", "store.audit=true");
     controller.sendCommand("collect", "start", "");
     BOOST_LOG_TRIVIAL(debug) << "Going to sleep";
     this_thread::sleep_for(chrono::seconds(5));
@@ -174,7 +184,7 @@ TEST_F(MockServer, testControllerRestart) {
         ASSERT_TRUE(Utils::compareFiles("test_geo.json", url));
         storedUrls.pop();
     }
-    stop();
+    controller.sendCommand("configure", "clear", "");
 }
 
 
