@@ -25,12 +25,12 @@ string CurlSettings::get(const string & key) {
 
 void CurlSettings::save() {
     BOOST_LOG_TRIVIAL(debug) << "Saving settings";
-    if (!filesystem::exists("conf")) filesystem::create_directory("conf");    
-    ini_parser::write_ini("conf/conf.ini", settings);
+    if (!filesystem::exists("data/conf")) filesystem::create_directories("data/conf");    
+    ini_parser::write_ini("data/conf/conf.ini", settings);
 }
 
 void CurlSettings::load() {
-    if (!filesystem::exists("conf")) return;    
+    if (!filesystem::exists("data/conf")) return;    
     BOOST_LOG_TRIVIAL(debug) << "Loading settings";
-    ini_parser::read_ini("conf/conf.ini", settings);
+    ini_parser::read_ini("data/conf/conf.ini", settings);
 }

@@ -23,6 +23,7 @@ class Controller {
         shared_ptr<DataCollector> collector;
         shared_ptr<CommandQueue> commandQueue;
         shared_ptr<thread> dataCollectingThread;
+        bool running;
 };
 
 #endif

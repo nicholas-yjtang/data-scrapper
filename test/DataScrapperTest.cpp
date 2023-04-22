@@ -49,10 +49,7 @@ class MockServer: public::testing::Test {
         }
         ~MockServer() {
             BOOST_LOG_TRIVIAL(debug) << "Destroying MockServer";
-            if (app != nullptr) app->stop();
-            Utils::closeThread(app_thread);
-            app = nullptr;
-            app_thread = nullptr;
+            stop();
         }
 
         void SetUp() override {
@@ -77,6 +74,14 @@ class MockServer: public::testing::Test {
             BOOST_LOG_TRIVIAL(debug) << "Server started";
         }
 
+        void stop() {
+            BOOST_LOG_TRIVIAL(debug) << "Stopping MockServer";
+            if (app != nullptr) app->stop();
+            Utils::closeThread(app_thread);
+            app = nullptr;
+            app_thread = nullptr;            
+        }
+
         void TearDown() override {
             BOOST_LOG_TRIVIAL(debug) << "Tearing down MockServer";
         }
@@ -86,11 +91,12 @@ class MockServer: public::testing::Test {
 
 TEST_F(MockServer, testData) {
     BOOST_LOG_TRIVIAL(debug) << "Testing Data related classes";
+    port = 18081;
     run();
     auto settings = DataCollectorSettingsFactory::getInstance().createDataCollectorSettings("curl");
     auto storage  = DataStorageFactory::getInstance().createDataStorage("local");
     auto scrapper = DataCollectorFactory::getInstance().createDataCollector("curl");
-    settings->set("data.url", "http://localhost:18080/data");
+    settings->set("data.url", "http://localhost:" + to_string(port) + "/data");
     settings->set("data.name", "test");
     settings->set("data.type", "json");
     scrapper->setSettings(settings);
@@ -112,14 +118,14 @@ TEST_F(MockServer, testData) {
 
 TEST_F(MockServer, testController) {
     BOOST_LOG_TRIVIAL(debug) << "Testing Controller";
-    port = 18081;
+    port = 18082;
     run();
     Controller controller;
     controller.sendCommand("configure", "put", "data.url=http://localhost:" + to_string(port) + "/data");
     controller.sendCommand("configure", "put", "data.name=test");
     controller.sendCommand("configure", "put", "data.type=json");
     controller.sendCommand("collect", "start", "");
-    this_thread::sleep_for(chrono::seconds(10));
+    this_thread::sleep_for(chrono::seconds(5));
     controller.sendCommand("collect", "stop", "");
     controller.closeThreads();
     auto storedUrls = controller.getStoredUrls();
@@ -131,6 +137,47 @@ TEST_F(MockServer, testController) {
     }
 
 }
+
+TEST_F(MockServer, testControllerRestart) {
+    BOOST_LOG_TRIVIAL(debug) << "Testing Restarting Controller";
+    port = 18083;
+    run();
+    Controller controller;
+    controller.sendCommand("configure", "put", "data.url=http://localhost:" + to_string(port) + "/data");
+    controller.sendCommand("configure", "put", "data.name=test");
+    controller.sendCommand("configure", "put", "data.type=json");
+    controller.sendCommand("configure" , "put", "data.timeout=500");
+    controller.sendCommand("collect", "start", "");
+    BOOST_LOG_TRIVIAL(debug) << "Going to sleep";
+    this_thread::sleep_for(chrono::seconds(5));
+    BOOST_LOG_TRIVIAL(debug) << "Stopping the server";
+    stop();
+    BOOST_LOG_TRIVIAL(debug) << "Server stopped";
+    auto storedUrls = controller.getStoredUrls();
+    while (!storedUrls.empty()) {
+        string url = storedUrls.front();
+        BOOST_LOG_TRIVIAL(debug) << "Stored url: " << url;
+        ASSERT_TRUE(Utils::compareFiles("test_geo.json", url));
+        storedUrls.pop();
+    }
+    port = 18084;
+    run();
+    controller.sendCommand("configure", "put", "data.url=http://localhost:" + to_string(port) + "/data");
+    this_thread::sleep_for(chrono::seconds(5));
+    controller.sendCommand("collect", "stop", "");
+    controller.closeThreads();
+    storedUrls = controller.getStoredUrls();
+    ASSERT_TRUE(!storedUrls.empty());
+    while (!storedUrls.empty()) {
+        string url = storedUrls.front();
+        BOOST_LOG_TRIVIAL(debug) << "Stored url: " << url;
+        ASSERT_TRUE(Utils::compareFiles("test_geo.json", url));
+        storedUrls.pop();
+    }
+    stop();
+}
+
+
 int main (int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
     RedirectLogger logger;

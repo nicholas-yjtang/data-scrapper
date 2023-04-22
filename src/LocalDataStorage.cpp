@@ -15,8 +15,9 @@ LocalDataStorage::~LocalDataStorage() {
 
 void LocalDataStorage::storeData(shared_ptr<Data> data) {
     BOOST_LOG_TRIVIAL(debug) << "Storing data";    
-    if (!boost::filesystem::exists("data")) boost::filesystem::create_directory("data");    
-    string filePath = "data/" + data->getDataName() + "_" + getEpochTime() + "." + data->getDataType();
+    string output_dir = "data/output/";
+    if (!boost::filesystem::exists(output_dir)) boost::filesystem::create_directories(output_dir);   
+    string filePath = output_dir + data->getDataName() + "_" + getEpochTime() + "." + data->getDataType();
     FILE * file = fopen(filePath.c_str(), "wb");
     fwrite(data->getData(), sizeof(char), data->getDataSize(), file);
     fclose(file);

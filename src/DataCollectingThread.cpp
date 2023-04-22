@@ -4,17 +4,20 @@
 #include <chrono>
 #include <thread>
 
-int DataCollectingThread::operator () (shared_ptr<DataCollector> collector, shared_ptr<CommandQueue> commands) const {
+int DataCollectingThread::operator () (shared_ptr<DataCollector> collector, shared_ptr<CommandQueue> commands, bool & running) const {
     BOOST_LOG_TRIVIAL(debug) << "Starting DataCollectingThread";
+    running = true;
     if (collector == nullptr) {
         BOOST_LOG_TRIVIAL(error) << "DataCollector is nullptr";
+        running = false;
         return 1;
     }
     if (commands == nullptr) {
         BOOST_LOG_TRIVIAL(error) << "CommandQueue is nullptr";
+        running = false;
         return 1;
     }
-    while (true) {
+    while (running) {
         if (!commands->isEmpty()) {
             BOOST_LOG_TRIVIAL(debug) << "CommandQueue is not empty";
             auto command = commands->pop();
@@ -38,5 +41,6 @@ int DataCollectingThread::operator () (shared_ptr<DataCollector> collector, shar
         this_thread::sleep_for(chrono::milliseconds(timeout_milliseconds));
 
     }
+    running = false;
     return 0;
 }

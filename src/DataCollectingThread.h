@@ -7,7 +7,7 @@
 
 class DataCollectingThread {
     public:
-        int operator () (shared_ptr<DataCollector> collector, shared_ptr<CommandQueue> commands) const;
+        int operator () (shared_ptr<DataCollector> collector, shared_ptr<CommandQueue> commands, bool & running) const;
 };
 
 #endif

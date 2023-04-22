@@ -25,5 +25,7 @@ class CurlScrapper : public DataCollector {
         shared_ptr<DataStorage> storage;
         shared_ptr<DataCollectorSettings> settings;
         void resetChunk();
+        void setUrl();
+        void setTimeout();
 };
 #endif

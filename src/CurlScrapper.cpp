@@ -18,9 +18,11 @@ CurlScrapper::~CurlScrapper() {
 }
 
 void CurlScrapper::collectData() {
-    BOOST_LOG_TRIVIAL(debug) << "Collecting data";
     if (!curl) return;
     try {
+        BOOST_LOG_TRIVIAL(debug) << "Collecting data";
+        setUrl();
+        setTimeout();
         CURLcode res = curl_easy_perform(curl);
         if (res != CURLE_OK) {
             BOOST_LOG_TRIVIAL(error) << "curl_easy_perform() failed: " << curl_easy_strerror(res);
@@ -35,21 +37,33 @@ void CurlScrapper::collectData() {
         BOOST_LOG_TRIVIAL(error) << "Exception while collecting data: " << e.what();
         resetChunk();
     }    
+    BOOST_LOG_TRIVIAL(debug) << "Data collected";
 }
 
 void CurlScrapper::build() {
     BOOST_LOG_TRIVIAL(debug) << "Building CurlScrapper";
-    if (settings == nullptr) return;
+    if (settings == nullptr) return;    
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
+
+}
+
+void CurlScrapper::setTimeout() {
+    BOOST_LOG_TRIVIAL(debug) << "Setting timeout for CurlScrapper";
+    string timeout_string =settings->get("data.timeout");
+    int timeout = 1000;
+    if (!timeout_string.empty()) timeout = stoi(timeout_string);
+    curl_easy_setopt(curl,CURLOPT_TIMEOUT_MS, timeout);
+}
+
+void CurlScrapper::setUrl() {
     string url = settings->get("data.url");
     if (url.empty()) {
         BOOST_LOG_TRIVIAL(error) << "No url specified";
         return;
     }
-    BOOST_LOG_TRIVIAL(debug) << "Setting url: " << url;
+    BOOST_LOG_TRIVIAL(debug) << "Setting url for CurlScrapper: " << url;
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str()); 
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
-
 }
 
 void CurlScrapper::setStorage(shared_ptr<DataStorage> storage) {

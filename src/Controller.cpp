@@ -10,6 +10,7 @@ Controller::Controller() {
     BOOST_LOG_TRIVIAL(debug) << "Creating Controller";
     commandQueue = make_shared<CommandQueue>();
     dataCollectingThread = nullptr;
+    running = false;
     build();
 }
 
@@ -28,12 +29,17 @@ void Controller::build() {
 
 void Controller::run() {
     BOOST_LOG_TRIVIAL(debug) << "Running Controller";
+    if (running) {
+        BOOST_LOG_TRIVIAL(warning) << "Controller already running";
+        return;
+    }
     closeThreads();
+    running = true;
     collector = DataCollectorFactory::getInstance().createDataCollector("curl");
     collector->setSettings(settings);
     collector->setStorage(storage);
     collector->build();
-    dataCollectingThread = make_shared<thread>(DataCollectingThread(), collector, commandQueue);
+    dataCollectingThread = make_shared<thread>(DataCollectingThread(), collector, commandQueue, ref(running));
     BOOST_LOG_TRIVIAL(debug) << "Set up complete, controller running";
 }
 

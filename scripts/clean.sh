@@ -5,5 +5,5 @@ pushd test
 rm -rf cmake_install.cmake CMakeCache.txt Makefile DataScrapperTest data conf
 popd
 rm -rf build
-rm -rf cmake_install.cmake CMakeCache.txt Makefile DataScrapper data conf
+rm -rf cmake_install.cmake CMakeCache.txt Makefile DataScrapper
 popd
