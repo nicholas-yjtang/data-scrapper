@@ -3,8 +3,9 @@
 #include "Command.h"
 #include <chrono>
 #include <thread>
+#include <condition_variable>
 
-int DataCollectingThread::operator () (shared_ptr<DataCollector> collector, shared_ptr<CommandQueue> commands, bool & running) const {
+int DataCollectingThread::operator () (shared_ptr<DataCollector> collector, shared_ptr<CommandQueue> commands, bool & running, mutex & sleepMutex, condition_variable & sleepCondition) const {
     BOOST_LOG_TRIVIAL(debug) << "Starting DataCollectingThread";
     running = true;
     if (collector == nullptr) {
@@ -16,7 +17,7 @@ int DataCollectingThread::operator () (shared_ptr<DataCollector> collector, shar
         BOOST_LOG_TRIVIAL(error) << "CommandQueue is nullptr";
         running = false;
         return 1;
-    }
+    }  
     while (running) {
         if (!commands->isEmpty()) {
             BOOST_LOG_TRIVIAL(debug) << "CommandQueue is not empty";
@@ -37,8 +38,9 @@ int DataCollectingThread::operator () (shared_ptr<DataCollector> collector, shar
         else {
             BOOST_LOG_TRIVIAL(trace) << "Setting timeout to " << timeout_string << " milliseconds";
             timeout_milliseconds = stoi(timeout_string);
-        }        
-        this_thread::sleep_for(chrono::milliseconds(timeout_milliseconds));
+        }  
+        std::unique_lock<std::mutex> lock(sleepMutex); 
+        sleepCondition.wait_for(lock, chrono::milliseconds(timeout_milliseconds));
 
     }
     running = false;

@@ -10,7 +10,7 @@ Controller::Controller() {
     BOOST_LOG_TRIVIAL(debug) << "Creating Controller";
     commandQueue = make_shared<CommandQueue>();
     dataCollectingThread = nullptr;
-    running = false;
+    running = false;    
     build();
 }
 
@@ -40,7 +40,7 @@ void Controller::run() {
     collector->setSettings(settings);
     collector->setStorage(storage);
     collector->build();
-    dataCollectingThread = make_shared<thread>(DataCollectingThread(), collector, commandQueue, ref(running));
+    dataCollectingThread = make_shared<thread>(DataCollectingThread(), collector, commandQueue, ref(running), ref(sleepMutex), ref(sleepCondition));
     BOOST_LOG_TRIVIAL(debug) << "Set up complete, controller running";
 }
 
@@ -48,8 +48,13 @@ void Controller::closeThreads() {
     BOOST_LOG_TRIVIAL(debug) << "Closing threads";
     if (commandQueue == nullptr) return;
     if (dataCollectingThread == nullptr) return;
+    {
+        lock_guard<mutex> lock(sleepMutex); 
+        running = false;
+    }
+    sleepCondition.notify_all();
     commandQueue->push(Command::COLLECTION_STOP);
-    dataCollectingThread->join();
+    if (dataCollectingThread->joinable()) dataCollectingThread->join();
     dataCollectingThread = nullptr;
 }
 

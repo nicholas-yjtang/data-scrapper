@@ -8,4 +8,4 @@ COPY scripts scripts
 COPY test test
 COPY CMakeLists.txt CMakeLists.txt
 RUN /bin/bash scripts/build.sh
-CMD ["DataScrapper"]
+CMD ./DataScrapper

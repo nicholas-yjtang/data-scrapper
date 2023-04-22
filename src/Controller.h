@@ -6,6 +6,7 @@
 #include "DataCollector.h"
 #include "CommandQueue.h"
 #include <thread>
+#include <condition_variable>
 using namespace std;
 
 class Controller {
@@ -24,6 +25,8 @@ class Controller {
         shared_ptr<CommandQueue> commandQueue;
         shared_ptr<thread> dataCollectingThread;
         bool running;
+        mutex sleepMutex;
+        condition_variable sleepCondition;
 };
 
 #endif

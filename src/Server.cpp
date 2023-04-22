@@ -3,6 +3,8 @@
 #include <crow.h>
 #include <memory>
 #include "Controller.h"
+#include <boost/log/expressions.hpp>
+#include <boost/log/core.hpp>
 
 using namespace std;
 
@@ -48,6 +50,35 @@ void Server::start() {
         auto keys = req.url_params.keys();
         crow::response r;
         for (size_t i = 0; i < keys.size(); i++) {
+            string option = keys[i] + "=" + req.url_params.get(keys[i]);
+            controller.sendCommand("configure", "put", option);
+        }
+        r.set_header("Content-Type", "application/json");
+        return r;
+    });
+
+    CROW_ROUTE((*app), "/log").methods("POST"_method)([&] (const crow::request& req) {
+        auto keys = req.url_params.keys();
+        crow::response r;
+        for (size_t i = 0; i < keys.size(); i++) {
+            if (keys[i] == "level") {
+                string level = req.url_params.get(keys[i]);
+                if (level == "debug") {
+                    boost::log::core::get()->set_filter(boost::log::trivial::severity >= boost::log::trivial::debug);
+                }
+                else if (level == "info") {
+                    boost::log::core::get()->set_filter(boost::log::trivial::severity >= boost::log::trivial::info);
+                }
+                else if (level == "warning") {
+                    boost::log::core::get()->set_filter(boost::log::trivial::severity >= boost::log::trivial::warning);
+                }
+                else if (level == "error") {
+                    boost::log::core::get()->set_filter(boost::log::trivial::severity >= boost::log::trivial::error);
+                }
+                else if (level == "fatal") {
+                    boost::log::core::get()->set_filter(boost::log::trivial::severity >= boost::log::trivial::fatal);
+                }
+            }
             string option = keys[i] + "=" + req.url_params.get(keys[i]);
             controller.sendCommand("configure", "put", option);
         }
