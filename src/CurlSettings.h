@@ -12,8 +12,8 @@ class CurlSettings : public DataSettings {
         void set(const string & key, const string & value) override;
         string get(const string & key) override;
         void clear() override;
-        void save();
-        void load();
+        void save() override;
+        void load() override;
     private:
         ptree settings;
 };

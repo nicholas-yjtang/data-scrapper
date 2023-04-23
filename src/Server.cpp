@@ -57,6 +57,19 @@ void Server::start() {
         return r;
     });
 
+    CROW_ROUTE((*app), "/configure").methods("POST"_method)([&] (const crow::request& req) {
+        auto keys = req.url_params.keys();
+        crow::response r;
+        for (size_t i = 0; i < keys.size(); i++) {
+            if (keys[i] == "action") {
+                controller.sendCommand("configure", req.url_params.get(keys[i]), "");
+            }
+
+        }
+        r.set_header("Content-Type", "application/json");
+        return r;
+    });
+
     CROW_ROUTE((*app), "/log").methods("POST"_method)([&] (const crow::request& req) {
         auto keys = req.url_params.keys();
         crow::response r;

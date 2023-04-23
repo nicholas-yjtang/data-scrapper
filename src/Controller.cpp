@@ -85,6 +85,20 @@ void Controller::sendCommand(const string & command, const string & action, cons
             }
             settings->clear();
         }
+        else if (action == "save") {
+            if (settings == nullptr) {
+                BOOST_LOG_TRIVIAL(warning) << "Settings not initialized";
+                return;
+            }
+            settings->save();
+        }
+        else if (action == "load") {
+            if (settings == nullptr) {
+                BOOST_LOG_TRIVIAL(warning) << "Settings not initialized";
+                return;
+            }
+            settings->load();
+        }
     }
     else BOOST_LOG_TRIVIAL(warning) << "Unknown command: " << command;
 

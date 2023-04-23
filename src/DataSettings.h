@@ -8,6 +8,8 @@ class DataSettings {
         virtual void set(const string & key, const string & value) = 0;
         virtual string get(const string & key) = 0;
         virtual void clear() = 0;
+        virtual void save() = 0;
+        virtual void load() = 0;
 };
 
 #endif

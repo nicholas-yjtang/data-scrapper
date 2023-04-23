@@ -89,6 +89,34 @@ class MockServer: public::testing::Test {
         shared_ptr<thread> app_thread;
 };
 
+TEST (TestSettings, TestSettings) {
+    auto settings = DataSettingsFactory::getInstance().createDataSettings("curl");
+    string data_url = "http://localhost:18080/data";
+    string data_name = "test";
+    string data_type = "json";
+    settings->set("data.url", data_url);
+    settings->set("data.name", data_name);
+    settings->set("data.type", data_type);
+    ASSERT_EQ(settings->get("data.url"), data_url);
+    ASSERT_EQ(settings->get("data.name"), data_name);
+    ASSERT_EQ(settings->get("data.type"), data_type);
+    settings->save();
+    settings->clear();
+    ASSERT_EQ(settings->get("data.url"), "");
+    ASSERT_EQ(settings->get("data.name"), "");
+    ASSERT_EQ(settings->get("data.type"), "");
+    settings->load();
+    ASSERT_EQ(settings->get("data.url"), data_url);
+    ASSERT_EQ(settings->get("data.name"), data_name);
+    ASSERT_EQ(settings->get("data.type"), data_type);
+    settings->clear();
+    settings->save();
+    settings->load();
+    ASSERT_EQ(settings->get("data.url"), "");
+    ASSERT_EQ(settings->get("data.name"), "");
+    ASSERT_EQ(settings->get("data.type"), "");
+}
+
 TEST_F(MockServer, testData) {
     BOOST_LOG_TRIVIAL(debug) << "Testing Data related classes";
     port = 18081;
