@@ -48,10 +48,7 @@ void Controller::closeThreads() {
     BOOST_LOG_TRIVIAL(debug) << "Closing threads";
     if (commandQueue == nullptr) return;
     if (dataCollectingThread == nullptr) return;
-    {
-        lock_guard<mutex> lock(sleepMutex); 
-        running = false;
-    }
+    running = false;
     sleepCondition.notify_all();
     commandQueue->push(Command::COLLECTION_STOP);
     if (dataCollectingThread->joinable()) dataCollectingThread->join();
