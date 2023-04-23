@@ -49,8 +49,8 @@ void Controller::closeThreads() {
     if (commandQueue == nullptr) return;
     if (dataCollectingThread == nullptr) return;
     running = false;
-    sleepCondition.notify_all();
     commandQueue->push(Command::COLLECTION_STOP);
+    sleepCondition.notify_all();
     if (dataCollectingThread->joinable()) dataCollectingThread->join();
     dataCollectingThread = nullptr;
 }
