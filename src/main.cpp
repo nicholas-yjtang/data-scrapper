@@ -9,7 +9,8 @@ int main(int argc, char *argv[])
 {
     boost::log::core::get()->set_filter(boost::log::trivial::severity  >=  boost::log::trivial::info);
     BOOST_LOG_TRIVIAL(info) << "Starting application";
-    auto server = make_unique<Server>();
+    int port = getenv("DS_PORT") ? stoi(getenv("DS_PORT")) : 18080;
+    auto server = make_unique<Server>(port);
     server->start();
     return 0;
 }

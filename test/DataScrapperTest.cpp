@@ -1,18 +1,18 @@
 #include <gtest/gtest.h>
 #include <boost/log/trivial.hpp>
-#include "../include/crow.h"
+#include "crow.h"
 #include <memory>
 #include <future>
-#include "../src/Utils.h"
-#include "../src/CurlScrapper.h"
-#include "../src/CurlSettings.h"
-#include "../src/LocalDataStorage.h"
+#include "Utils.h"
+#include "CurlScrapper.h"
+#include "CurlSettings.h"
+#include "LocalDataStorage.h"
 #include <boost/log/expressions.hpp>
 #include <boost/log/utility/setup/file.hpp>
-#include "../src/DataCollectorFactory.h"
-#include "../src/DataSettingsFactory.h"
-#include "../src/DataStorageFactory.h"
-#include "../src/Controller.h"
+#include "DataCollectorFactory.h"
+#include "DataSettingsFactory.h"
+#include "DataStorageFactory.h"
+#include "Controller.h"
 
 using namespace std;
 

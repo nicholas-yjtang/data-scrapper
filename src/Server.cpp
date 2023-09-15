@@ -31,7 +31,7 @@ class RedirectLogger: public crow::ILogHandler {
         }
 };
 
-Server::Server() {
+Server::Server(int port ) : port(port) {
     BOOST_LOG_TRIVIAL(debug) << "Creating Server";
 }
 
@@ -111,5 +111,5 @@ void Server::start() {
         r.set_header("Content-Type", "application/json");
         return r;
     });
-    app->port(18080).run();
+    app->port(port).run();
 }

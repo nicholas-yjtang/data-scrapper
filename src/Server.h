@@ -3,10 +3,12 @@
 
 class Server {
     public:
-        Server();
+        Server(int port = 18080);
         virtual ~Server();
         void start();
         void stop();
+    private:
+        int port;
 };
 
 #endif

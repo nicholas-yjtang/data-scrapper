@@ -4,7 +4,8 @@ RUN apt update && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt install -y tzdat
 RUN mkdir -p /opt/datascrapper
 WORKDIR /opt/datascrapper
 COPY src src
-COPY scripts scripts
+RUN mkdir scripts
+COPY scripts/build.sh scripts/test.sh scripts/
 COPY test test
 COPY CMakeLists.txt CMakeLists.txt
 RUN /bin/bash scripts/build.sh
